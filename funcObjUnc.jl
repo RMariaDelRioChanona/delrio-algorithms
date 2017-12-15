@@ -1,7 +1,9 @@
-# multidimensional x^2 objective function
+module funcObjUnc
+   #include("funcObjUnc.jl")
+    f_x2(a) = sum(a'*a)
 
-f(a) = sum(a'*a)
+    # multidimensional x^2 objective function
 
-# multidimensional x^2 objective function
-
-f(a,b) = sum(a'*b + b'*a)
+    f_xy(a,b) = sum(a'*b + b'*a)
+    export f_x2, f_xy
+end
