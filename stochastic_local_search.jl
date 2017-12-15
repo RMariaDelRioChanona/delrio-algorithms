@@ -1,13 +1,17 @@
-# Stochastic local search algorithm (LS)
+#import funcObjUnc
 
-import funcObjUnc
+module funcObjUnc
+	include("funcObjUnc.jl")
+end
+
+using funcObjUnc
 using Distributions
 using PyPlot
 
-function localSearchAlgo(f, p_init, max_iter, radius, params = ["no"])
+function localSearchAlgo(f, p_init, max_iter, radius, params = [False])
 
     # define whether to plot the results in 2D
-    make_plot = "no"
+    make_plot = params[1]
     # define the dimension of variables through initial point
     len = length(p_init)
     if len < 1 & make_plot
@@ -32,19 +36,9 @@ function localSearchAlgo(f, p_init, max_iter, radius, params = ["no"])
     end
     # main algorithm LS (end)
     if make_plot
-        plot(all_results)
+        scatter(p_new[1], p_new[2], c=all_results , cmap='seismic')
+        show()
     end
 
     return p_new, best_result
-end
-
-
-module funcObjUnc
-	# multidimensional x^2 objective function
-
-	f(a) = sum(a'*a)
-
-	# multidimensional x^2 objective function
-
-	f(a,b) = sum(a'*b + b'*a)
 end
