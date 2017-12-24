@@ -70,8 +70,8 @@ function localSearchAlgo(f, p_init, max_iter, bounds, radius; params=[false])
 
     # plotting
     if make_plot
-        scatter(all_trials[1,2:end], all_trials[2,2:end], c=all_results[2:end] , cmap="seismic")
-        #plot(all_trials[1, :], all_trials[2, :], "o")#, p_new[2])
+        scatter(all_trials[1,2:end], all_trials[2,2:end], marker="." , c=all_results[2:end] , cmap="seismic")
+        #plot(all_trials[1, :], all_trials[2, :], ".")#, p_new[2])
         show()
     end
     return p_init, best_result, all_trials
