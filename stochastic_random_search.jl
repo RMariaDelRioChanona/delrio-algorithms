@@ -44,9 +44,9 @@ function randomSearchAlgo(f, max_iter, bounds; params=[false])
 
     # plotting
     if make_plot
-        scatter(all_trials[1, :], all_trials[2, :], c=all_results , cmap="seismic")
+        scatter(all_trials[1, :], all_trials[2, :], marker=".", c=all_results , cmap="seismic")
         #plot(all_trials[1, :], all_trials[2, :], "o")#, p_new[2])
         show()
     end
-    return p_best, best_result
+    return p_best, best_result, all_trials, all_results
 end
