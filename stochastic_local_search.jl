@@ -1,6 +1,5 @@
 # stochastic local search algorithm
-function localSearchAlgo(f, p_init, max_iter, radius; params=[false])
-
+function localSearchAlgo(f, p_init, max_iter, bounds, radius; params=[false])
     # define whether to plot the results in 2D
     make_plot = params[1]
     # define the dimension of variables through initial point
@@ -8,6 +7,15 @@ function localSearchAlgo(f, p_init, max_iter, radius; params=[false])
     # if dimension is less than 2 warning for plotting
     if len < 1 & make_plot
         print("warning will not plot")
+    end
+
+    for dim = 1:len
+        if bounds[dim][1] < p_init[dim] < bounds[dim][2]
+            dummy=1
+        else
+            println("initial condition outside bounds")
+            break
+        end
     end
 
     # define initial evaluated function
@@ -32,9 +40,20 @@ function localSearchAlgo(f, p_init, max_iter, radius; params=[false])
         test_result = f(p_new)
         # test wether new point is better than best known
         if test_result < best_result
-            p_init = p_new
-            best_result = test_result
-            max_rep = 0
+            switch = 1
+            for dim = 1:len
+                if bounds[dim][1] < p_new[dim] < bounds[dim][2]
+                    dummy=1
+                else
+                    switch = 0
+                    break
+                end
+            end
+            if switch == 1
+              p_init = p_new
+              best_result = test_result
+              max_rep = 0
+            end
         end
         max_rep += 1
         # compile list of all results for plotting
@@ -51,9 +70,9 @@ function localSearchAlgo(f, p_init, max_iter, radius; params=[false])
 
     # plotting
     if make_plot
-        scatter(all_trials[1, :], all_trials[2, :], c=all_results , cmap="seismic")
+        scatter(all_trials[1,2:end], all_trials[2,2:end], c=all_results[2:end] , cmap="seismic")
         #plot(all_trials[1, :], all_trials[2, :], "o")#, p_new[2])
         show()
     end
-    return p_init, best_result
+    return p_init, best_result, all_trials
 end
