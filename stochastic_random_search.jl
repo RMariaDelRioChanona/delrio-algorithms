@@ -11,7 +11,7 @@ function randomSearchAlgo(f, max_iter, bounds; params=[false])
     end
 
     #define initial random particle
-    p_best = Float64[rand(Uniform(bounds[i][1],bounds[i][2])) for i=1:len]
+    p_best = Float64[rand(Uniform(bounds[j][1],bounds[j][2])) for j=1:len]
     # define initial evaluated function
     best_result = f(p_best)
     # define vector of all obj valiues
@@ -25,8 +25,8 @@ function randomSearchAlgo(f, max_iter, bounds; params=[false])
     max_rep = 0
     for i = 1:max_iter
 
-        # define new rando, particle
-        p_new = Float64[rand(Uniform(bounds[i][1],bounds[i][2])) for i=1:len] 
+        # define new random particle
+        p_new = Float64[rand(Uniform(bounds[j][1],bounds[j][2])) for j=1:len] 
         # obj value for trial point
         test_result = f(p_new)
         # test wether new point is better than best known
