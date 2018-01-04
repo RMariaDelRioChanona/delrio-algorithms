@@ -22,7 +22,7 @@ function geneticTournamentSearch(f, max_eval, n_wizards, bounds, mut_frac, mut_p
         println("warning will not plot")
     end
     
-    n_duels = ceil(n_wizards/duel_size) 
+    n_duels = convert(Int64, ceil(n_wizards/duel_size)) 
     #at most half of the replaces particles should be mutates
     #since after the tournament a "training" stage of mutation comes
     if (n_wizards - n_duels)/n_wizards < mut_frac * 2
@@ -39,36 +39,44 @@ function geneticTournamentSearch(f, max_eval, n_wizards, bounds, mut_frac, mut_p
         score[wiz] = f(wizards[:, wiz])
     end
     # track evaluated particles
-    all_trials[:,i] = deepcopy(wizards)
-    all_results[i] = deepcopy(score)
+    all_trials = deepcopy(wizards)
+    all_results = deepcopy(score)
     
     #initialize best particles
     winners = zeros((len, n_duels))
-    # main algorithm (start)
+    # best_wizard and best_result must be defined for convenience
+    best_wizard = wizards[:,1]
+    best_result = f(wizards[:,1])
+		# main algorithm (start)
     for iter = 1:max_iter
-        #shuffle 
+        #  ------------ shuffle ------------ #
         
-        
+        wizards = wizards[:,shuffle(1:end)]
+        #a = a[shuffle(1:end), :]
+        #  ------------ do tournament only every so interations ------------ #
         # tournament (begin)
         for duel = 1:(n_duels)
             # choose if end of list or not
-            a = minimum(duel*duel_size, n_wizards)
+            idx0 = convert(Int64, minimum([duel*duel_size, n_wizards]))
             # choose which particles will enter the tournamente this round
-            wizards_in_duel = wizards[(duel - 1) * duel_size + 1 : a]
+            idx1 = convert(Int64, (duel - 1) * duel_size + 1)
+            wizards_in_duel = wizards[:, idx1:idx0]
             # select particle 1 to be the "best so far"
-            best_wizard =  wizards_in_duel[1]
+            # -------------------------- best_wizard =  wizards_in_duel[1]
             best_result = f(best_wizard)
             # tournament round
-            for wiz in wizards_in_duel[2:end]
+            for w = 2:n_wizards
+                wiz = wizards[:, w]
                 test_result = f(wiz)
                 if test_result < best_result
-                    best_wiz = copy(wiz)
+                    best_wizard = copy(wiz)
+                    best_result = test_result
                 end
             end
-            winners[:, duel] = copy(best_wiz)
+                      
+            winners[:, duel] = copy(best_wizard)
         end
         # tournament (end)
-        
         #best particles are kept (survive)
         wizards[:, 1:n_duels] = deepcopy(winners)
         # here we re-evaluate the best particles as they are now the firsts in the list
@@ -79,25 +87,25 @@ function geneticTournamentSearch(f, max_eval, n_wizards, bounds, mut_frac, mut_p
         #reproduction (begin) 
         # here we just name the final index of the cross over for convenience
         max_crossover_ind = convert(Int64, floor((1 - mut_frac) * n_wizards))
-        for new = (n_duels + 1):max_crossover_ind
+        for new = (n_duels + 1):max_crossover_ind 
             # choose the first parent
             dad1_pos = rand(1:n_duels)
             dad2_pos = rand(1:n_duels)
-            # make sure parent 1 and parent 2 are not the same 
+            # make sure parent 1 and parent 2 are not the same
             while dad1_pos == dad2_pos
                 dad2_pos = rand(1:n_duels)
             end
             # pure cross-over
-            wizards[:, new] = [ if rand(Uniform(0,1))<0.5 winners[gene,dad1_pos] else winners[gene,dad2_pos] end for gene=1:len ]
+            wizards[:, new] = [if rand(Uniform(0,1))<0.5 winners[gene,dad1_pos] else winners[gene,dad2_pos] end for gene=1:len]
             score[new] = f(wizards[:, new])
             # cross-over + mutation
-            if new <= (n_duels + 1) + (mut_frac) * n_wizards
-                wizards[:, new + max_crossover_ind] = [ if rand(Uniform(0,1)) < mut_prob rand(Uniform(bounds[gene][1], bounds[gene][2])) else wizards[gene, new] end for gene=1:len ]
-            		score[new + max_crossover_ind] = f(wizards[:, new + max_crossover_ind])
+            if new < (n_duels + 1) + (mut_frac) * n_wizards
+                mutant_indx = new + max_crossover_ind - n_duels
+                score[mutant_indx] = f(wizards[:, mutant_indx])
+                wizards[:, mutant_indx] = [ if rand(Uniform(0,1)) < mut_prob rand(Uniform(bounds[gene][1], bounds[gene][2])) else wizards[gene, new] end for gene=1:len ]
             end            
         end
         #reproduction (end)
-        
         
     		#concatenating results to plot. Note one is hcat other vcat.
     		all_trials = hcat(all_trials, wizards)
@@ -108,8 +116,8 @@ function geneticTournamentSearch(f, max_eval, n_wizards, bounds, mut_frac, mut_p
 
     # plotting
     if make_plot
-        scatter(all_trials[1, :], all_trials[2, :], marker=".", c=all_results , cmap="seismic")
+        scatter(all_trials[1, :], all_trials[2, :], marker="o", c=all_results , cmap="seismic")
         show()
     end
-    return point_LS, result_LS, radLS
+    return best_wizard, best_result
 end
