@@ -1,2 +1,2 @@
 # delrio-algorithms
-Basic algorithms exercises.
+Basic optimization algorithms. Coding exercises.
